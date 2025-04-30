@@ -51,9 +51,6 @@ export default function Templates() {
     const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
     const [isNewTemplate, setIsNewTemplate] = useState(false);
     const [newTemplateName, setNewTemplateName] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    const [addTemplateOpen, setAddTemplateOpen] = useState(false);
     const [templateContent, setTemplateContent] = useState('');
 
     const handleSaveTemplate = () => {
@@ -69,15 +66,6 @@ export default function Templates() {
             setIsNewTemplate(false);
             setNewTemplateName('');
         }
-    };
-
-    const handleCreateTemplate = () => {
-        setEditingTemplate({
-            id: `new-${Date.now()}`,
-            name: newTemplateName,
-            content: '<p>Start typing your template...</p>',
-        });
-        setIsNewTemplate(true);
     };
 
     return (
