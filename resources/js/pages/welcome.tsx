@@ -1,791 +1,1070 @@
+import AppLogoIcon from '@/components/app-logo-icon';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Bell, Calendar, CheckCircle, ChevronRight, Clock, MessageSquare, Sparkles, Users, ArrowUp } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { useFloatAnimation } from '@/hooks/use-float-animation';
+import { useCountUp } from '@/hooks/use-count-up';
+import { useSmoothScroll } from '@/hooks/use-smooth-scroll';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
+    const [isScrolled, setIsScrolled] = useState(false);
+    const { getFloatingStyle } = useFloatAnimation();
+    const observerRef = useRef<HTMLDivElement>(null);
+    const { scrollToTop } = useSmoothScroll({ offset: 0 });
+
+    // Animation variants
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 60 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.8, ease: 'easeOut' },
+        },
+    };
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.3,
+            },
+        },
+    };
+
+    const staggerItem = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: 'easeOut' },
+        },
+    };
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // When the sentinel is visible (at top of viewport), navbar is transparent
+                setIsScrolled(!entry.isIntersecting);
+            },
+            { 
+                threshold: 0,
+                rootMargin: '-5px 0px 0px 0px' // Matches the top-5 position of sentinel
+            }
+        );
+
+        if (observerRef.current) {
+            observer.observe(observerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <>
-            <Head title="Welcome">
-                <link rel="preconnect" href="https://fonts.bunny.net" />
-                <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+            <Head title="WishWave - Personalized Messaging">
+                <link rel="dns-prefetch" href="https://fonts.bunny.net" />
+                <link rel="preconnect" href="https://fonts.bunny.net" crossOrigin="anonymous" />
+                <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700" rel="stylesheet" />
             </Head>
-            <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]">
-                <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
-                    <nav className="flex items-center justify-end gap-4">
+
+            {/* Sentinel div for scroll observation - positioned at scroll trigger point */}
+            <div 
+                ref={observerRef} 
+                className="absolute top-5 h-[1px] w-full pointer-events-none opacity-0" 
+                aria-hidden="true"
+            />
+
+            {/* Scroll to top button */}
+            <AnimatePresence>
+                {isScrolled && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        whileHover={{ 
+                            scale: 1.05,
+                            boxShadow: "0 8px 20px -8px rgba(79, 70, 229, 0.5)"
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={scrollToTop}
+                        className="group fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-fuchsia-600 p-0.5 text-white shadow-lg transition-all duration-300 hover:shadow-indigo-500/25"
+                        aria-label="Scroll to top"
+                    >
+                        <span className="absolute inset-0.5 rounded-[10px] bg-black/80 transition-opacity group-hover:opacity-0" />
+                        <span className="relative flex items-center justify-center">
+                            <ArrowUp className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+                        </span>
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
+            {/* Gradient background with noise texture */}
+            <div className="relative min-h-screen overflow-hidden bg-black text-white">
+                {/* Background gradient and dots */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950"></div>
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wNikiLz48L3N2Zz4=')] opacity-40"></div>
+
+                {/* Glow elements */}
+                <div className="absolute top-1/4 -left-20 h-[400px] w-[400px] rounded-full bg-purple-600/20 blur-[150px]"></div>
+                <div className="absolute -right-20 bottom-1/3 h-[400px] w-[400px] rounded-full bg-blue-600/20 blur-[150px]"></div>
+
+                {/* Navbar - glassmorphism effect */}
+                <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black/70 backdrop-blur-lg' : 'bg-transparent'}`}>
+                    <div className="container mx-auto flex h-20 items-center justify-between px-6">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-600 p-0.5">
+                                <div className="flex size-full items-center justify-center rounded-[10px] bg-black/80">
+                                    <AppLogoIcon className="size-5 fill-white" />
+                                </div>
+                            </div>
+                            <span className="text-xl font-bold tracking-tight">WishWave</span>
+                        </div>
+
+                        <nav className="hidden items-center gap-8 md:flex">
+                            <a href="#features" className="text-sm font-medium text-white/80 transition-colors hover:text-white">
+                                Features
+                            </a>
+                            <a href="#how-it-works" className="text-sm font-medium text-white/80 transition-colors hover:text-white">
+                                How It Works
+                            </a>
+                            <a href="#pricing" className="text-sm font-medium text-white/80 transition-colors hover:text-white">
+                                Pricing
+                            </a>
+                        </nav>
+
+                        <div className="flex items-center gap-4">
                         {auth.user ? (
                             <Link
                                 href={route('dashboard')}
-                                className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                                    className="inline-flex h-10 items-center justify-center rounded-lg bg-white/10 px-5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/15"
                             >
                                 Dashboard
                             </Link>
                         ) : (
                             <>
-                                <Link
-                                    href={route('login')}
-                                    className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                                >
+                                    <Link href={route('login')} className="text-sm font-medium text-white/80 transition-colors hover:text-white">
                                     Log in
                                 </Link>
                                 <Link
                                     href={route('register')}
-                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                                        className="inline-flex h-10 items-center justify-center rounded-lg bg-white/10 px-5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/15"
                                 >
-                                    Register
+                                        Sign up
                                 </Link>
                             </>
                         )}
-                    </nav>
+                        </div>
+                    </div>
                 </header>
-                <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
-                    <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
-                        <div className="flex-1 rounded-br-lg rounded-bl-lg bg-white p-6 pb-12 text-[13px] leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-tl-lg lg:rounded-br-none lg:p-20 dark:bg-[#161615] dark:text-[#EDEDEC] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
-                            <h1 className="mb-1 font-medium">Let's get started</h1>
-                            <p className="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
-                                Laravel has an incredibly rich ecosystem.
-                                <br />
-                                We suggest starting with the following.
-                            </p>
-                            <ul className="mb-4 flex flex-col lg:mb-6">
-                                <li className="relative flex items-center gap-4 py-2 before:absolute before:top-1/2 before:bottom-0 before:left-[0.4rem] before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A]">
-                                    <span className="relative bg-white py-1 dark:bg-[#161615]">
-                                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#e3e3e0] bg-[#FDFDFC] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] dark:border-[#3E3E3A] dark:bg-[#161615]">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A]" />
-                                        </span>
-                                    </span>
-                                    <span>
-                                        Read the
-                                        <a
-                                            href="https://laravel.com/docs"
-                                            target="_blank"
-                                            className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
+
+                <main>
+                    {/* Hero Section with 3D-like elements */}
+                    <section className="relative py-20 md:py-32">
+                        <div className="container mx-auto px-6">
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.2 }}
+                                variants={fadeInUp}
+                                className="reveal flex flex-col items-center"
+                            >
+                                {/* Eyebrow text */}
+                                <div className="mb-6 inline-flex items-center rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
+                                    <Sparkles className="mr-2 size-4 text-fuchsia-400" />
+                                    <span className="text-xs font-medium text-white/80">Never miss another special moment</span>
+                                </div>
+
+                                {/* Hero heading */}
+                                <h1 className="font-outfit relative z-10 max-w-4xl bg-gradient-to-b from-white via-white to-white/70 bg-clip-text text-center text-5xl leading-tight font-bold tracking-tight text-transparent md:text-6xl lg:text-7xl">
+                                    Celebrate Life's Moments With Personalized Messages
+                                </h1>
+
+                                {/* Description */}
+                                <p className="mt-6 max-w-2xl text-center text-lg text-white/70 md:text-xl">
+                                    Smart scheduling and beautiful templates to help you send the perfect message at the perfect time—via SMS,
+                                    WhatsApp, or email to individuals and groups.
+                                </p>
+
+                                {/* CTA buttons */}
+                                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                                    <Link href={route('register')}>
+                                        <Button
+                                            size="lg"
+                                            className="relative h-12 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40"
                                         >
-                                            <span>Documentation</span>
-                                            <svg
-                                                width={10}
-                                                height={11}
-                                                viewBox="0 0 10 11"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-2.5 w-2.5"
-                                            >
-                                                <path
-                                                    d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="square"
-                                                />
-                                            </svg>
-                                        </a>
+                                            <span className="relative z-10">Get Started Free</span>
+                                            <span className="absolute inset-0 flex items-center justify-end pr-4 opacity-60">
+                                                <ArrowRight className="size-5" />
                                     </span>
-                                </li>
-                                <li className="relative flex items-center gap-4 py-2 before:absolute before:top-0 before:bottom-1/2 before:left-[0.4rem] before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A]">
-                                    <span className="relative bg-white py-1 dark:bg-[#161615]">
-                                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#e3e3e0] bg-[#FDFDFC] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] dark:border-[#3E3E3A] dark:bg-[#161615]">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A]" />
+                                        </Button>
+                                    </Link>
+                                    <button className="flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-8 text-base font-medium text-white backdrop-blur-sm hover:bg-white/10">
+                                        Watch Demo
+                                    </button>
+                                </div>
+
+                                {/* App mockup */}
+                                <div className="relative mt-20 flex w-full max-w-4xl justify-center">
+                                    {/* Decoration elements */}
+                                    <div className="absolute top-1/4 -left-10 size-20 rounded-full bg-fuchsia-500/30 blur-2xl"></div>
+                                    <div className="absolute -right-10 bottom-1/3 size-20 rounded-full bg-indigo-500/30 blur-2xl"></div>
+
+                                    {/* Main mockup - Using embedded CSS design instead of external images */}
+                                    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-indigo-950/30 to-fuchsia-950/30 p-1 shadow-2xl backdrop-blur-sm">
+                                        <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-900">
+                                            {/* App UI mockup using pure CSS */}
+                                            <div className="absolute inset-0 flex flex-col p-6">
+                                                {/* App header */}
+                                                <div className="mb-6 flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+                                                            <MessageSquare className="h-4 w-4 text-white" />
+                                                        </div>
+                                                        <span className="font-medium text-white">WishWave</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <Bell className="h-5 w-5 text-white/70" />
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/20">
+                                                            <span className="text-sm text-white">JD</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* App content */}
+                                                <div className="flex h-full gap-6">
+                                                    {/* Sidebar */}
+                                                    <div className="flex w-64 flex-col rounded-xl bg-slate-800/50 p-4">
+                                                        <div className="mb-4">
+                                                            <h3 className="mb-3 text-sm font-medium text-white">Dashboard</h3>
+                                                            <div className="space-y-2">
+                                                                <div className="flex items-center gap-3 rounded-lg bg-indigo-500/20 p-2">
+                                                                    <Calendar className="h-4 w-4 text-indigo-400" />
+                                                                    <span className="text-sm text-white">Upcoming</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 rounded-lg p-2">
+                                                                    <Users className="h-4 w-4 text-white/60" />
+                                                                    <span className="text-sm text-white/70">Contacts</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 rounded-lg p-2">
+                                                                    <MessageSquare className="h-4 w-4 text-white/60" />
+                                                                    <span className="text-sm text-white/70">Templates</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Main content */}
+                                                    <div className="flex flex-1 flex-col">
+                                                        <h2 className="mb-4 text-lg font-medium text-white">Upcoming Events</h2>
+
+                                                        {/* Events list */}
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/20">
+                                                                        <span className="text-sm text-indigo-300">EM</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-sm font-medium text-white">Emily's Birthday</div>
+                                                                        <div className="text-xs text-indigo-300">Tomorrow</div>
+                                                                    </div>
+                                                                </div>
+                                                                <button className="rounded-lg bg-indigo-500 px-3 py-1 text-xs text-white">
+                                                                    Send Now
+                                                                </button>
+                                                            </div>
+
+                                                            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/20">
+                                                                        <span className="text-sm text-indigo-300">MJ</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-sm font-medium text-white">Michael's Anniversary</div>
+                                                                        <div className="text-xs text-indigo-300">In 3 days</div>
+                                                                    </div>
+                                                                </div>
+                                                                <button className="rounded-lg bg-white/10 px-3 py-1 text-xs text-white">Edit</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Floating notification element */}
+                                        <div className="absolute -top-6 right-10 w-64 rotate-6 transform rounded-xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md transition-transform duration-500 hover:rotate-0 md:-top-10 md:right-20">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">
+                                                    <Bell className="h-5 w-5 text-indigo-400" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-white">Birthday Reminder</h4>
+                                                    <p className="mt-1 text-xs text-white/70">Emily's birthday is tomorrow! Send her a message.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Floating message element */}
+                                        <div className="absolute -bottom-6 -left-4 w-64 -rotate-3 transform rounded-xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md transition-transform duration-500 hover:rotate-0 md:-left-10">
+                                            <div className="flex flex-col">
+                                                <span className="mb-1 text-xs text-indigo-300">Message Template</span>
+                                                <p className="text-sm text-white/90">
+                                                    Happy Birthday, Emily! 🎂 Wishing you a fantastic day filled with joy and celebration!
+                                                </p>
+                                                <div className="mt-2 flex justify-end">
+                                                    <span className="text-xs text-indigo-300">Scheduled for tomorrow</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Trusted by section */}
+                                <div className="mt-20">
+                                    <p className="mb-6 text-center text-sm font-medium tracking-wider text-white/60 uppercase">Trusted by teams at</p>
+                                    <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
+                                        {['Google', 'Microsoft', 'Airbnb', 'Uber', 'Spotify'].map((brand) => (
+                                            <span key={brand} className="text-lg font-bold tracking-tight text-white/50">
+                                                {brand}
                                         </span>
-                                    </span>
-                                    <span>
-                                        Watch video tutorials at
-                                        <a
-                                            href="https://laracasts.com"
-                                            target="_blank"
-                                            className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Animated Metrics Section */}
+                                <motion.div 
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={staggerContainer}
+                                    className="relative mt-24"
+                                >
+                                    {/* Animated particles background */}
+                                    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                                        {/* Randomly positioned animated dots and shapes */}
+                                        <div className="absolute top-[10%] left-[15%] h-2 w-2 animate-pulse rounded-full bg-indigo-500/30"></div>
+                                        <div className="absolute top-[20%] left-[80%] h-3 w-3 animate-pulse rounded-full bg-fuchsia-500/30"></div>
+                                        <div className="absolute top-[70%] left-[25%] h-2 w-2 animate-pulse rounded-full bg-indigo-500/30"></div>
+                                        <div className="absolute top-[80%] left-[70%] h-2.5 w-2.5 animate-pulse rounded-full bg-fuchsia-500/30"></div>
+
+                                        {/* Floating shapes with different animations */}
+                                        <div
+                                            style={getFloatingStyle(6, 0)}
+                                            className="absolute top-[15%] left-[10%] h-16 w-16 rotate-12 rounded-lg border border-indigo-500/20 opacity-40"
+                                        ></div>
+                                        <div
+                                            style={getFloatingStyle(8, 0.5)}
+                                            className="absolute top-[60%] left-[80%] h-12 w-12 rounded-full border border-fuchsia-500/20 opacity-30"
+                                        ></div>
+                                        <div
+                                            style={getFloatingStyle(10, 1)}
+                                            className="absolute top-[70%] left-[5%] h-24 w-24 -rotate-12 rounded-xl border border-white/10 opacity-20"
+                                        ></div>
+                                        <div
+                                            style={getFloatingStyle(7, 1.5)}
+                                            className="absolute top-[10%] left-[85%] h-20 w-20 rotate-45 rounded-full border border-indigo-500/20 opacity-30"
+                                        ></div>
+                        </div>
+
+                                    {/* Animated metrics content */}
+                                    <div className="mx-auto max-w-5xl">
+                                        <motion.div 
+                                            className="grid grid-cols-2 gap-8 md:grid-cols-4"
+                                            variants={staggerContainer}
                                         >
-                                            <span>Laracasts</span>
-                                            <svg
-                                                width={10}
-                                                height={11}
-                                                viewBox="0 0 10 11"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-2.5 w-2.5"
-                                            >
-                                                <path
-                                                    d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="square"
+                                            <motion.div variants={staggerItem}>
+                                                <AnimatedMetric
+                                                    value={5000}
+                                                    label="Active Users"
+                                                    icon={<Users className="h-5 w-5 text-indigo-400" />}
                                                 />
-                                            </svg>
-                                        </a>
-                                    </span>
-                                </li>
-                            </ul>
-                            <ul className="flex gap-3 text-sm leading-normal">
-                                <li>
-                                    <a
-                                        href="https://cloud.laravel.com"
-                                        target="_blank"
-                                        className="inline-block rounded-sm border border-black bg-[#1b1b18] px-5 py-1.5 text-sm leading-normal text-white hover:border-black hover:bg-black dark:border-[#eeeeec] dark:bg-[#eeeeec] dark:text-[#1C1C1A] dark:hover:border-white dark:hover:bg-white"
-                                    >
-                                        Deploy now
-                                    </a>
-                                </li>
-                            </ul>
+                                            </motion.div>
+                                            <motion.div variants={staggerItem}>
+                                                <AnimatedMetric
+                                                    value={125000}
+                                                    label="Messages Sent"
+                                                    icon={<MessageSquare className="h-5 w-5 text-fuchsia-400" />}
+                                                />
+                                            </motion.div>
+                                            <motion.div variants={staggerItem}>
+                                                <AnimatedMetric
+                                                    value={99.8}
+                                                    isPercentage={true}
+                                                    label="Delivery Rate"
+                                                    icon={<CheckCircle className="h-5 w-5 text-indigo-400" />}
+                                                />
+                                            </motion.div>
+                                            <motion.div variants={staggerItem}>
+                                                <AnimatedMetric
+                                                    value={98}
+                                                    isPercentage={true}
+                                                    label="User Satisfaction"
+                                                    icon={<Sparkles className="h-5 w-5 text-fuchsia-400" />}
+                                                />
+                                            </motion.div>
+                                        </motion.div>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
                         </div>
-                        <div className="relative -mb-px aspect-[335/376] w-full shrink-0 overflow-hidden rounded-t-lg bg-[#fff2f2] lg:mb-0 lg:-ml-px lg:aspect-auto lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-[#1D0002]">
-                            <svg
-                                className="w-full max-w-none translate-y-0 text-[#F53003] opacity-100 transition-all duration-750 dark:text-[#F61500] starting:translate-y-6 starting:opacity-0"
-                                viewBox="0 0 438 104"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                    </section>
+
+                    {/* Features section with glassmorphism cards */}
+                    <section id="features" className="py-20 md:py-32">
+                        <div className="container mx-auto px-6">
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={fadeInUp}
+                                className="mb-16 text-center transform-3d"
                             >
-                                <path d="M17.2036 -3H0V102.197H49.5189V86.7187H17.2036V-3Z" fill="currentColor" />
-                                <path
-                                    d="M110.256 41.6337C108.061 38.1275 104.945 35.3731 100.905 33.3681C96.8667 31.3647 92.8016 30.3618 88.7131 30.3618C83.4247 30.3618 78.5885 31.3389 74.201 33.2923C69.8111 35.2456 66.0474 37.928 62.9059 41.3333C59.7643 44.7401 57.3198 48.6726 55.5754 53.1293C53.8287 57.589 52.9572 62.274 52.9572 67.1813C52.9572 72.1925 53.8287 76.8995 55.5754 81.3069C57.3191 85.7173 59.7636 89.6241 62.9059 93.0293C66.0474 96.4361 69.8119 99.1155 74.201 101.069C78.5885 103.022 83.4247 103.999 88.7131 103.999C92.8016 103.999 96.8667 102.997 100.905 100.994C104.945 98.9911 108.061 96.2359 110.256 92.7282V102.195H126.563V32.1642H110.256V41.6337ZM108.76 75.7472C107.762 78.4531 106.366 80.8078 104.572 82.8112C102.776 84.8161 100.606 86.4183 98.0637 87.6206C95.5202 88.823 92.7004 89.4238 89.6103 89.4238C86.5178 89.4238 83.7252 88.823 81.2324 87.6206C78.7388 86.4183 76.5949 84.8161 74.7998 82.8112C73.004 80.8078 71.6319 78.4531 70.6856 75.7472C69.7356 73.0421 69.2644 70.1868 69.2644 67.1821C69.2644 64.1758 69.7356 61.3205 70.6856 58.6154C71.6319 55.9102 73.004 53.5571 74.7998 51.5522C76.5949 49.5495 78.738 47.9451 81.2324 46.7427C83.7252 45.5404 86.5178 44.9396 89.6103 44.9396C92.7012 44.9396 95.5202 45.5404 98.0637 46.7427C100.606 47.9451 102.776 49.5487 104.572 51.5522C106.367 53.5571 107.762 55.9102 108.76 58.6154C109.756 61.3205 110.256 64.1758 110.256 67.1821C110.256 70.1868 109.756 73.0421 108.76 75.7472Z"
-                                    fill="currentColor"
-                                />
-                                <path
-                                    d="M242.805 41.6337C240.611 38.1275 237.494 35.3731 233.455 33.3681C229.416 31.3647 225.351 30.3618 221.262 30.3618C215.974 30.3618 211.138 31.3389 206.75 33.2923C202.36 35.2456 198.597 37.928 195.455 41.3333C192.314 44.7401 189.869 48.6726 188.125 53.1293C186.378 57.589 185.507 62.274 185.507 67.1813C185.507 72.1925 186.378 76.8995 188.125 81.3069C189.868 85.7173 192.313 89.6241 195.455 93.0293C198.597 96.4361 202.361 99.1155 206.75 101.069C211.138 103.022 215.974 103.999 221.262 103.999C225.351 103.999 229.416 102.997 233.455 100.994C237.494 98.9911 240.611 96.2359 242.805 92.7282V102.195H259.112V32.1642H242.805V41.6337ZM241.31 75.7472C240.312 78.4531 238.916 80.8078 237.122 82.8112C235.326 84.8161 233.156 86.4183 230.614 87.6206C228.07 88.823 225.251 89.4238 222.16 89.4238C219.068 89.4238 216.275 88.823 213.782 87.6206C211.289 86.4183 209.145 84.8161 207.35 82.8112C205.554 80.8078 204.182 78.4531 203.236 75.7472C202.286 73.0421 201.814 70.1868 201.814 67.1821C201.814 64.1758 202.286 61.3205 203.236 58.6154C204.182 55.9102 205.554 53.5571 207.35 51.5522C209.145 49.5495 211.288 47.9451 213.782 46.7427C216.275 45.5404 219.068 44.9396 222.16 44.9396C225.251 44.9396 228.07 45.5404 230.614 46.7427C233.156 47.9451 235.326 49.5487 237.122 51.5522C238.917 53.5571 240.312 55.9102 241.31 58.6154C242.306 61.3205 242.806 64.1758 242.806 67.1821C242.805 70.1868 242.305 73.0421 241.31 75.7472Z"
-                                    fill="currentColor"
-                                />
-                                <path d="M438 -3H421.694V102.197H438V-3Z" fill="currentColor" />
-                                <path d="M139.43 102.197H155.735V48.2834H183.712V32.1665H139.43V102.197Z" fill="currentColor" />
-                                <path
-                                    d="M324.49 32.1665L303.995 85.794L283.498 32.1665H266.983L293.748 102.197H314.242L341.006 32.1665H324.49Z"
-                                    fill="currentColor"
-                                />
-                                <path
-                                    d="M376.571 30.3656C356.603 30.3656 340.797 46.8497 340.797 67.1828C340.797 89.6597 356.094 104 378.661 104C391.29 104 399.354 99.1488 409.206 88.5848L398.189 80.0226C398.183 80.031 389.874 90.9895 377.468 90.9895C363.048 90.9895 356.977 79.3111 356.977 73.269H411.075C413.917 50.1328 398.775 30.3656 376.571 30.3656ZM357.02 61.0967C357.145 59.7487 359.023 43.3761 376.442 43.3761C393.861 43.3761 395.978 59.7464 396.099 61.0967H357.02Z"
-                                    fill="currentColor"
-                                />
-                            </svg>
-                            <svg
-                                className="relative -mt-[4.9rem] -ml-8 w-[448px] max-w-none lg:-mt-[6.6rem] lg:ml-0 dark:hidden"
-                                viewBox="0 0 440 376"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                                <h2 className="font-outfit bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl">
+                                    Features designed for connection
+                                </h2>
+                                <p className="mt-4 text-white/70">Everything you need to stay in touch with the people who matter most.</p>
+                            </motion.div>
+
+                            <motion.div 
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={staggerContainer}
+                                className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
                             >
-                                <g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
-                                    <path
-                                        d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z"
-                                        fill="black"
-                                    />
-                                    <path
-                                        d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z"
-                                        fill="black"
-                                    />
-                                    <path
-                                        d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z"
-                                        fill="#F8B803"
-                                    />
-                                    <path
-                                        d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z"
-                                        fill="#F8B803"
-                                    />
-                                    <path
-                                        d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                >
-                                    <path
-                                        d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z"
-                                        fill="#F0ACB8"
-                                    />
-                                    <path
-                                        d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z"
-                                        fill="#F0ACB8"
-                                    />
-                                    <path
-                                        d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g
-                                    /** @ts-expect-error 'plus-darker' doesn't seem to be defined in the 'csstype' module */
-                                    style={{ mixBlendMode: 'plus-darker' }}
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                >
-                                    <path
-                                        d="M230.951 281.792L231.282 281.793C238.128 274.907 248.453 265.823 262.256 254.539C275.617 243.256 285.666 234.267 292.402 227.573C299.027 220.688 303.554 213.421 305.983 205.771C308.412 198.12 307.253 190.183 302.504 181.959C297.203 172.778 289.749 165.415 280.142 159.868C270.645 154.13 260.596 151.26 249.995 151.26C239.615 151.26 232.823 154.033 229.621 159.579C226.309 164.934 227.413 172.393 232.935 181.956L168.335 181.954C159.058 165.888 155.082 151.543 156.407 138.92C157.953 126.298 164.247 116.544 175.289 109.659C186.442 102.583 201.294 99.045 219.846 99.0457C239.281 99.0464 258.551 102.585 277.655 109.663C296.649 116.549 313.986 126.303 329.667 138.927C345.349 151.551 357.827 165.895 367.104 181.961C375.718 196.88 379.528 209.981 378.535 221.265C377.762 232.549 374.063 242.399 367.438 250.814C361.033 259.229 351.095 269.557 337.624 281.796L419.782 281.8L448.605 331.719L259.774 331.712L230.951 281.792Z"
-                                        fill="#F3BEC7"
-                                    />
-                                    <path
-                                        d="M51.8063 152.402L28.9479 152.401L-0.0411453 102.195L85.7608 102.198L218.282 331.711L155.339 331.709L51.8063 152.402Z"
-                                        fill="#F3BEC7"
-                                    />
-                                    <path
-                                        d="M230.951 281.792L231.282 281.793C238.128 274.907 248.453 265.823 262.256 254.539C275.617 243.256 285.666 234.267 292.402 227.573C299.027 220.688 303.554 213.421 305.983 205.771C308.412 198.12 307.253 190.183 302.504 181.959C297.203 172.778 289.749 165.415 280.142 159.868C270.645 154.13 260.596 151.26 249.995 151.26C239.615 151.26 232.823 154.033 229.621 159.579C226.309 164.934 227.413 172.393 232.935 181.956L168.335 181.954C159.058 165.888 155.082 151.543 156.407 138.92C157.953 126.298 164.247 116.544 175.289 109.659C186.442 102.583 201.294 99.045 219.846 99.0457C239.281 99.0464 258.551 102.585 277.655 109.663C296.649 116.549 313.986 126.303 329.667 138.927C345.349 151.551 357.827 165.895 367.104 181.961C375.718 196.88 379.528 209.981 378.535 221.265C377.762 232.549 374.063 242.399 367.438 250.814C361.033 259.229 351.095 269.557 337.624 281.796L419.782 281.8L448.605 331.719L259.774 331.712L230.951 281.792Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M51.8063 152.402L28.9479 152.401L-0.0411453 102.195L85.7608 102.198L218.282 331.711L155.339 331.709L51.8063 152.402Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
-                                    <path
-                                        d="M188.467 355.363L188.798 355.363C195.644 348.478 205.969 339.393 219.772 328.11C233.133 316.826 243.181 307.837 249.917 301.144C253.696 297.217 256.792 293.166 259.205 288.991C261.024 285.845 262.455 282.628 263.499 279.341C265.928 271.691 264.768 263.753 260.02 255.529C254.719 246.349 247.265 238.985 237.657 233.438C228.16 227.7 218.111 224.831 207.51 224.83C197.13 224.83 190.339 227.603 187.137 233.149C183.824 238.504 184.929 245.963 190.45 255.527L125.851 255.524C116.574 239.458 112.598 225.114 113.923 212.491C114.615 206.836 116.261 201.756 118.859 197.253C122.061 191.704 126.709 187.03 132.805 183.229C143.958 176.153 158.81 172.615 177.362 172.616C196.797 172.617 216.067 176.156 235.171 183.233C254.164 190.119 271.502 199.874 287.183 212.497C302.864 225.121 315.343 239.466 324.62 255.532C333.233 270.45 337.044 283.551 336.05 294.835C335.46 303.459 333.16 311.245 329.151 318.194C327.915 320.337 326.515 322.4 324.953 324.384C318.549 332.799 308.611 343.127 295.139 355.367L377.297 355.37L406.121 405.289L217.29 405.282L188.467 355.363Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M9.32197 225.972L-13.5365 225.971L-42.5255 175.765L43.2765 175.768L175.798 405.282L112.854 405.279L9.32197 225.972Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M345.247 111.915C329.566 99.2919 312.229 89.5371 293.235 82.6512L235.167 183.228C254.161 190.114 271.498 199.869 287.179 212.492L345.247 111.915Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M382.686 154.964C373.41 138.898 360.931 124.553 345.25 111.93L287.182 212.506C302.863 225.13 315.342 239.475 324.618 255.541L382.686 154.964Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M293.243 82.6472C274.139 75.57 254.869 72.031 235.434 72.0303L177.366 172.607C196.801 172.608 216.071 176.147 235.175 183.224L293.243 82.6472Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M394.118 194.257C395.112 182.973 391.301 169.872 382.688 154.953L324.619 255.53C333.233 270.448 337.044 283.55 336.05 294.834L394.118 194.257Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M235.432 72.0311C216.88 72.0304 202.027 75.5681 190.875 82.6442L132.806 183.221C143.959 176.145 158.812 172.607 177.363 172.608L235.432 72.0311Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M265.59 124.25C276.191 124.251 286.24 127.12 295.737 132.858L237.669 233.435C228.172 227.697 218.123 224.828 207.522 224.827L265.59 124.25Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M295.719 132.859C305.326 138.406 312.78 145.77 318.081 154.95L260.013 255.527C254.712 246.347 247.258 238.983 237.651 233.436L295.719 132.859Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M387.218 217.608C391.227 210.66 393.527 202.874 394.117 194.25L336.049 294.827C335.459 303.451 333.159 311.237 329.15 318.185L387.218 217.608Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M245.211 132.577C248.413 127.03 255.204 124.257 265.584 124.258L207.516 224.835C197.136 224.834 190.345 227.607 187.143 233.154L245.211 132.577Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M318.094 154.945C322.842 163.17 324.002 171.107 321.573 178.757L263.505 279.334C265.934 271.684 264.774 263.746 260.026 255.522L318.094 154.945Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M176.925 96.6737C180.127 91.1249 184.776 86.4503 190.871 82.6499L132.803 183.227C126.708 187.027 122.059 191.702 118.857 197.25L176.925 96.6737Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M387.226 217.606C385.989 219.749 384.59 221.813 383.028 223.797L324.96 324.373C326.522 322.39 327.921 320.326 329.157 318.183L387.226 217.606Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M317.269 188.408C319.087 185.262 320.519 182.045 321.562 178.758L263.494 279.335C262.451 282.622 261.019 285.839 259.201 288.985L317.269 188.408Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M245.208 132.573C241.895 137.928 243 145.387 248.522 154.95L190.454 255.527C184.932 245.964 183.827 238.505 187.14 233.15L245.208 132.573Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M176.93 96.6719C174.331 101.175 172.686 106.255 171.993 111.91L113.925 212.487C114.618 206.831 116.263 201.752 118.862 197.249L176.93 96.6719Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M317.266 188.413C314.853 192.589 311.757 196.64 307.978 200.566L249.91 301.143C253.689 297.216 256.785 293.166 259.198 288.99L317.266 188.413Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M464.198 304.708L435.375 254.789L377.307 355.366L406.13 405.285L464.198 304.708Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M353.209 254.787C366.68 242.548 376.618 232.22 383.023 223.805L324.955 324.382C318.55 332.797 308.612 343.124 295.141 355.364L353.209 254.787Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M435.37 254.787L353.212 254.784L295.144 355.361L377.302 355.364L435.37 254.787Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M183.921 154.947L248.521 154.95L190.453 255.527L125.853 255.524L183.921 154.947Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M171.992 111.914C170.668 124.537 174.643 138.881 183.92 154.947L125.852 255.524C116.575 239.458 112.599 225.114 113.924 212.491L171.992 111.914Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M307.987 200.562C301.251 207.256 291.203 216.244 277.842 227.528L219.774 328.105C233.135 316.821 243.183 307.832 249.919 301.139L307.987 200.562Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M15.5469 75.1797L44.5359 125.386L-13.5321 225.963L-42.5212 175.756L15.5469 75.1797Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M277.836 227.536C264.033 238.82 253.708 247.904 246.862 254.789L188.794 355.366C195.64 348.481 205.965 339.397 219.768 328.113L277.836 227.536Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M275.358 304.706L464.189 304.713L406.12 405.29L217.29 405.283L275.358 304.706Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M44.5279 125.39L67.3864 125.39L9.31834 225.967L-13.5401 225.966L44.5279 125.39Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M101.341 75.1911L233.863 304.705L175.795 405.282L43.2733 175.768L101.341 75.1911ZM15.5431 75.19L-42.525 175.767L43.277 175.77L101.345 75.1932L15.5431 75.19Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M246.866 254.784L246.534 254.784L188.466 355.361L188.798 355.361L246.866 254.784Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M246.539 254.781L275.362 304.701L217.294 405.277L188.471 355.358L246.539 254.781Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M67.3906 125.391L170.923 304.698L112.855 405.275L9.32257 225.967L67.3906 125.391Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M170.921 304.699L233.865 304.701L175.797 405.278L112.853 405.276L170.921 304.699Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                </g>
-                                <g
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                >
-                                    <path
-                                        d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z"
-                                        fill="#F0ACB8"
-                                    />
-                                    <path
-                                        d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                        strokeLinejoin="round"
-                                    />
-                                </g>
-                                <g
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                >
-                                    <path
-                                        d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z"
-                                        fill="#F0ACB8"
-                                    />
-                                    <path
-                                        d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z"
-                                        stroke="#1B1B18"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                            </svg>
-                            <svg
-                                className="relative -mt-[4.9rem] -ml-8 hidden w-[448px] max-w-none lg:-mt-[6.6rem] lg:ml-0 dark:block"
-                                viewBox="0 0 440 376"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
-                                    <path
-                                        d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z"
-                                        fill="black"
-                                    />
-                                    <path
-                                        d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z"
-                                        fill="black"
-                                    />
-                                    <path
-                                        d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z"
-                                        fill="#391800"
-                                    />
-                                    <path
-                                        d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z"
-                                        fill="#391800"
-                                    />
-                                    <path
-                                        d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                >
-                                    <path
-                                        d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z"
-                                        fill="#733000"
-                                    />
-                                    <path
-                                        d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z"
-                                        fill="#733000"
-                                    />
-                                    <path
-                                        d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
-                                    <path
-                                        d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.726 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                    <path
-                                        d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                                <g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
-                                    <path
-                                        d="M188.467 355.363L188.798 355.363C195.644 348.478 205.969 339.393 219.772 328.11C233.133 316.826 243.181 307.837 249.917 301.144C253.696 297.217 256.792 293.166 259.205 288.991C261.024 285.845 262.455 282.628 263.499 279.341C265.928 271.691 264.768 263.753 260.02 255.529C254.719 246.349 247.265 238.985 237.657 233.438C228.16 227.7 218.111 224.831 207.51 224.83C197.13 224.83 190.339 227.603 187.137 233.149C183.824 238.504 184.929 245.963 190.45 255.527L125.851 255.524C116.574 239.458 112.598 225.114 113.923 212.491C114.615 206.836 116.261 201.756 118.859 197.253C122.061 191.704 126.709 187.03 132.805 183.229C143.958 176.153 158.81 172.615 177.362 172.616C196.797 172.617 216.067 176.156 235.171 183.233C254.164 190.119 271.502 199.874 287.183 212.497C302.864 225.121 315.343 239.466 324.62 255.532C333.233 270.45 337.044 283.551 336.05 294.835C335.46 303.459 333.16 311.245 329.151 318.194C327.915 320.337 326.515 322.4 324.953 324.384C318.549 332.799 308.611 343.127 295.139 355.367L377.297 355.37L406.121 405.289L217.29 405.282L188.467 355.363Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M9.32197 225.972L-13.5365 225.971L-42.5255 175.765L43.2765 175.768L175.798 405.282L112.854 405.279L9.32197 225.972Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M345.247 111.915C329.566 99.2919 312.229 89.5371 293.235 82.6512L235.167 183.228C254.161 190.114 271.498 199.869 287.179 212.492L345.247 111.915Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M382.686 154.964C373.41 138.898 360.931 124.553 345.25 111.93L287.182 212.506C302.863 225.13 315.342 239.475 324.618 255.541L382.686 154.964Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M293.243 82.6472C274.139 75.57 254.869 72.031 235.434 72.0303L177.366 172.607C196.801 172.608 216.071 176.147 235.175 183.224L293.243 82.6472Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M394.118 194.257C395.112 182.973 391.301 169.872 382.688 154.953L324.619 255.53C333.233 270.448 337.044 283.55 336.05 294.834L394.118 194.257Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M235.432 72.0311C216.88 72.0304 202.027 75.5681 190.875 82.6442L132.806 183.221C143.959 176.145 158.812 172.607 177.363 172.608L235.432 72.0311Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M265.59 124.25C276.191 124.251 286.24 127.12 295.737 132.858L237.669 233.435C228.172 227.697 218.123 224.828 207.522 224.827L265.59 124.25Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M295.719 132.859C305.326 138.406 312.78 145.77 318.081 154.95L260.013 255.527C254.712 246.347 247.258 238.983 237.651 233.436L295.719 132.859Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M387.218 217.608C391.227 210.66 393.527 202.874 394.117 194.25L336.049 294.827C335.459 303.451 333.159 311.237 329.15 318.185L387.218 217.608Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M245.211 132.577C248.413 127.03 255.204 124.257 265.584 124.258L207.516 224.835C197.136 224.834 190.345 227.607 187.143 233.154L245.211 132.577Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M318.094 154.945C322.842 163.17 324.002 171.107 321.573 178.757L263.505 279.334C265.934 271.684 264.774 263.746 260.026 255.522L318.094 154.945Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M176.925 96.6737C180.127 91.1249 184.776 86.4503 190.871 82.6499L132.803 183.227C126.708 187.027 122.059 191.702 118.857 197.25L176.925 96.6737Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M387.226 217.606C385.989 219.749 384.59 221.813 383.028 223.797L324.96 324.373C326.522 322.39 327.921 320.326 329.157 318.183L387.226 217.606Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M317.269 188.408C319.087 185.262 320.519 182.045 321.562 178.758L263.494 279.335C262.451 282.622 261.019 285.839 259.201 288.985L317.269 188.408Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M245.208 132.573C241.895 137.928 243 145.387 248.522 154.95L190.454 255.527C184.932 245.964 183.827 238.505 187.14 233.15L245.208 132.573Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M176.93 96.6719C174.331 101.175 172.686 106.255 171.993 111.91L113.925 212.487C114.618 206.831 116.263 201.752 118.862 197.249L176.93 96.6719Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M317.266 188.413C314.853 192.589 311.757 196.64 307.978 200.566L249.91 301.143C253.689 297.216 256.785 293.166 259.198 288.99L317.266 188.413Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M464.198 304.708L435.375 254.789L377.307 355.366L406.13 405.285L464.198 304.708Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M353.209 254.787C366.68 242.548 376.618 232.22 383.023 223.805L324.955 324.382C318.55 332.797 308.612 343.124 295.141 355.364L353.209 254.787Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M435.37 254.787L353.212 254.784L295.144 355.361L377.302 355.364L435.37 254.787Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M183.921 154.947L248.521 154.95L190.453 255.527L125.853 255.524L183.921 154.947Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M171.992 111.914C170.668 124.537 174.643 138.881 183.92 154.947L125.852 255.524C116.575 239.458 112.599 225.114 113.924 212.491L171.992 111.914Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M307.987 200.562C301.251 207.256 291.203 216.244 277.842 227.528L219.774 328.105C233.135 316.821 243.183 307.832 249.919 301.139L307.987 200.562Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M15.5469 75.1797L44.5359 125.386L-13.5321 225.963L-42.5212 175.756L15.5469 75.1797Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M277.836 227.536C264.033 238.82 253.708 247.904 246.862 254.789L188.794 355.366C195.64 348.481 205.965 339.397 219.768 328.113L277.836 227.536Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M275.358 304.706L464.189 304.713L406.12 405.29L217.29 405.283L275.358 304.706Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M44.5279 125.39L67.3864 125.39L9.31834 225.967L-13.5401 225.966L44.5279 125.39Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M101.341 75.1911L233.863 304.705L175.795 405.282L43.2733 175.768L101.341 75.1911ZM15.5431 75.19L-42.525 175.767L43.277 175.77L101.345 75.1932L15.5431 75.19Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M246.866 254.784L246.534 254.784L188.466 355.361L188.798 355.361L246.866 254.784Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M246.539 254.781L275.362 304.701L217.294 405.277L188.471 355.358L246.539 254.781Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M67.3906 125.391L170.923 304.698L112.855 405.275L9.32257 225.967L67.3906 125.391Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                    <path
-                                        d="M170.921 304.699L233.865 304.701L175.797 405.278L112.853 405.276L170.921 304.699Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="bevel"
-                                    />
-                                </g>
-                                <g
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                >
-                                    <path
-                                        d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z"
-                                        fill="#4B0600"
-                                    />
-                                    <path
-                                        d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                        strokeLinejoin="round"
-                                    />
-                                </g>
-                                <g
-                                    className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
-                                    style={{ mixBlendMode: 'hard-light' }}
-                                >
-                                    <path
-                                        d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z"
-                                        fill="#4B0600"
-                                    />
-                                    <path
-                                        d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z"
-                                        stroke="#FF750F"
-                                        strokeWidth={1}
-                                    />
-                                </g>
-                            </svg>
-                            <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<MessageSquare />}
+                                        title="Smart Templates"
+                                        description="Choose from hundreds of pre-designed templates or create your own personalized messages for any occasion."
+                                    />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<Calendar />}
+                                        title="Automated Scheduling"
+                                        description="Set up messages to be delivered at the perfect time, days, weeks, or even months in advance."
+                                    />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<Users />}
+                                        title="Contact Management"
+                                        description="Organize contacts with custom groups, tags, and important dates to never miss a special moment."
+                                    />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<Bell />}
+                                        title="Smart Reminders"
+                                        description="Get notified about upcoming events so you can personalize your messages ahead of time."
+                                    />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<Clock />}
+                                        title="Time Zone Intelligence"
+                                        description="Messages are delivered at the appropriate local time, regardless of where your contacts are located."
+                                    />
+                                </motion.div>
+                                <motion.div variants={staggerItem}>
+                                    <FeatureCard
+                                        icon={<CheckCircle />}
+                                        title="Multi-Channel Delivery"
+                                        description="Send messages via SMS, WhatsApp, or email to individuals or groups for birthdays, new months, and other occasions."
+                                    />
+                                </motion.div>
+                            </motion.div>
                         </div>
+                    </section>
+
+                    {/* How It Works section */}
+                    <section id="how-it-works" className="relative overflow-hidden py-20 md:py-32">
+                        {/* Background decoration */}
+                        <div className="absolute top-1/3 -left-40 h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-[150px]"></div>
+
+                        <div className="container mx-auto px-6">
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.2 }}
+                                variants={fadeInUp}
+                                className="reveal mb-16 text-center"
+                            >
+                                <h2 className="font-outfit bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl">
+                                    How WishWave Works
+                                </h2>
+                                <p className="mx-auto mt-4 max-w-2xl text-white/70">Three simple steps to never miss an important moment again</p>
+                            </motion.div>
+
+                            <div className="reveal-sequence relative grid gap-12 md:grid-cols-3">
+                                {/* Connecting line for desktop */}
+                                <div className="absolute top-16 right-[calc(16.67%+1rem)] left-[calc(16.67%+1rem)] hidden h-0.5 bg-gradient-to-r from-indigo-500/40 to-fuchsia-500/40 md:block"></div>
+
+                                {/* Step 1 */}
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 opacity-30 blur-lg"></div>
+                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/50 backdrop-blur-sm">
+                                            <span className="font-outfit text-xl font-bold text-white">1</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="mt-6 text-xl font-semibold text-white">Connect Your Contacts</h3>
+                                    <p className="mt-3 text-sm text-white/70">
+                                        Import or add contacts with important dates like birthdays, anniversaries, and other special occasions.
+                                    </p>
+                                </div>
+
+                                {/* Step 2 */}
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 opacity-30 blur-lg"></div>
+                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/50 backdrop-blur-sm">
+                                            <span className="font-outfit text-xl font-bold text-white">2</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="mt-6 text-xl font-semibold text-white">Personalize Messages</h3>
+                                    <p className="mt-3 text-sm text-white/70">
+                                        Choose from templates or create custom messages for each occasion. Add personal touches to make them special.
+                                    </p>
+                                </div>
+
+                                {/* Step 3 */}
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 opacity-30 blur-lg"></div>
+                                        <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/50 backdrop-blur-sm">
+                                            <span className="font-outfit text-xl font-bold text-white">3</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="mt-6 text-xl font-semibold text-white">Schedule & Automate</h3>
+                                    <p className="mt-3 text-sm text-white/70">
+                                        Set delivery times and WishWave handles the rest. Messages are sent automatically at the perfect moment.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Screenshot mockup */}
+                            <div className="mt-20 flex justify-center">
+                                <div className="relative w-full max-w-5xl overflow-hidden">
+                                    {/* App interface mockup */}
+                                    <div className="relative mx-auto max-w-3xl overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-1 shadow-xl backdrop-blur-sm">
+                                        {/* Dashboard UI */}
+                                        <div className="aspect-[16/9] rounded-lg p-6">
+                                            {/* Header */}
+                                            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="rounded-md bg-indigo-600 p-1.5">
+                                                        <MessageSquare className="h-5 w-5 text-white" />
+                                                    </div>
+                                                    <span className="text-lg font-semibold text-white">WishWave</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="rounded-full bg-white/5 p-2">
+                                                        <Bell className="h-4 w-4 text-white/80" />
+                                                    </div>
+                                                    <div className="rounded-full bg-white/5 p-2">
+                                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500">
+                                                            <span className="text-[10px] text-white">JD</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Dashboard Content */}
+                                            <div className="grid grid-cols-3 gap-4">
+                                                {/* Stats cards */}
+                                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                                    <span className="text-xs text-white/60">Upcoming Events</span>
+                                                    <div className="mt-2 text-2xl font-bold text-white">12</div>
+                                                    <div className="mt-4 flex items-center">
+                                                        <div className="h-1 w-2/3 rounded-full bg-indigo-500"></div>
+                                                        <div className="h-1 w-1/3 rounded-full bg-white/10"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                                    <span className="text-xs text-white/60">Sent Messages</span>
+                                                    <div className="mt-2 text-2xl font-bold text-white">48</div>
+                                                    <div className="mt-4 flex items-center">
+                                                        <div className="h-1 w-4/5 rounded-full bg-fuchsia-500"></div>
+                                                        <div className="h-1 w-1/5 rounded-full bg-white/10"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                                    <span className="text-xs text-white/60">Total Contacts</span>
+                                                    <div className="mt-2 text-2xl font-bold text-white">86</div>
+                                                    <div className="mt-4 flex items-center">
+                                                        <div className="h-1 w-full rounded-full bg-indigo-500"></div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Calendar */}
+                                                <div className="col-span-2 rounded-lg border border-white/10 bg-white/5 p-4">
+                                                    <div className="mb-4 flex items-center justify-between">
+                                                        <span className="font-medium text-white">Upcoming Events</span>
+                                                        <div className="flex gap-2">
+                                                            <button className="rounded-md bg-white/10 p-1">
+                                                                <ChevronRight className="h-4 w-4 rotate-180 text-white" />
+                                                            </button>
+                                                            <button className="rounded-md bg-white/10 p-1">
+                                                                <ChevronRight className="h-4 w-4 text-white" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-2 grid grid-cols-7 gap-1">
+                                                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                                                            <div key={i} className="text-center text-xs text-white/60">
+                                                                {day}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-7 gap-1">
+                                                        {Array(35)
+                                                            .fill(0)
+                                                            .map((_, i) => {
+                                                                const isToday = i === 15;
+                                                                const hasEvent = i === 18 || i === 22;
+                                                                return (
+                                                                    <div
+                                                                        key={i}
+                                                                        className={`flex h-7 items-center justify-center rounded-md text-xs ${
+                                                                            isToday
+                                                                                ? 'bg-indigo-500 text-white'
+                                                                                : hasEvent
+                                                                                  ? 'text-white ring-1 ring-indigo-500/50'
+                                                                                  : 'text-white/60'
+                                                                        }`}
+                                                                    >
+                                                                        {i - 2}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                    </div>
+                                                </div>
+
+                                                {/* Messages */}
+                                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                                    <div className="mb-4 flex items-center justify-between">
+                                                        <span className="font-medium text-white">Recent Messages</span>
+                                                        <button className="text-xs text-indigo-400">View All</button>
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20">
+                                                                <span className="text-[10px] text-indigo-300">JM</span>
+                                                            </div>
+                                                            <span className="text-xs text-white/80">John • 2h ago</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-fuchsia-500/20">
+                                                                <span className="text-[10px] text-fuchsia-300">KL</span>
+                                                            </div>
+                                                            <span className="text-xs text-white/80">Kate • 5h ago</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Floating phone mockup */}
+                                    <div className="absolute -right-10 -bottom-10 hidden w-56 rotate-6 transform transition-transform duration-500 hover:rotate-0 md:right-0 md:block">
+                                        <div className="relative overflow-hidden rounded-3xl border-8 border-slate-950 shadow-xl">
+                                            <div className="aspect-[9/16] bg-gradient-to-b from-slate-900 to-black p-3">
+                                                {/* Phone notch */}
+                                                <div className="absolute inset-x-0 top-0 h-6 rounded-b-xl bg-slate-950"></div>
+
+                                                {/* Phone UI */}
+                                                <div className="pt-8">
+                                                    <div className="mb-4 flex items-center justify-between">
+                                                        <span className="text-xs font-semibold text-white">WishWave</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <Bell className="h-3 w-3 text-white/70" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-3 rounded-lg border border-white/10 bg-white/5 p-2">
+                                                        <div className="mb-1 text-[10px] font-medium text-white">Emily's Birthday</div>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[8px] text-indigo-300">Tomorrow</span>
+                                                            <button className="rounded bg-indigo-500 px-2 py-0.5 text-[8px] text-white">Send</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+                                                        <div className="mb-1 text-[10px] font-medium text-white">Michael's Anniversary</div>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[8px] text-indigo-300">In 3 days</span>
+                                                            <button className="rounded bg-white/10 px-2 py-0.5 text-[8px] text-white">Edit</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Floating tablet element */}
+                                    <div className="absolute -bottom-16 -left-10 hidden w-64 -rotate-12 transform transition-transform duration-500 hover:rotate-0 md:-left-20 md:block">
+                                        <div className="relative overflow-hidden rounded-2xl border-[10px] border-slate-900 shadow-xl">
+                                            <div className="aspect-[4/3] bg-gradient-to-b from-slate-900 to-black p-4">
+                                                {/* Tablet UI */}
+                                                <div className="mb-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="rounded bg-indigo-600 p-1">
+                                                            <MessageSquare className="h-3 w-3 text-white" />
+                                                        </div>
+                                                        <span className="text-xs font-semibold text-white">WishWave</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    <div className="w-1/3 rounded-lg border border-white/10 bg-white/5 p-2">
+                                                        <div className="mb-1 text-[8px] text-white/60">Templates</div>
+                                                        <div className="space-y-1">
+                                                            <div className="h-2 w-2/3 rounded-full bg-white/10"></div>
+                                                            <div className="h-2 w-full rounded-full bg-white/10"></div>
+                                                            <div className="h-2 w-1/2 rounded-full bg-white/10"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-2/3 rounded-lg border border-white/10 bg-white/5 p-2">
+                                                        <div className="mb-2 text-[10px] font-medium text-white">Birthday Template</div>
+                                                        <div className="space-y-1">
+                                                            <div className="h-1.5 w-full rounded-full bg-white/10"></div>
+                                                            <div className="h-1.5 w-full rounded-full bg-white/10"></div>
+                                                            <div className="h-1.5 w-2/3 rounded-full bg-white/10"></div>
+                                                        </div>
+
+                                                        <div className="mt-3 flex justify-end">
+                                                            <button className="rounded bg-indigo-500 px-2 py-0.5 text-[8px] text-white">
+                                                                Use Template
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Pricing Section */}
+                    <section id="pricing" className="relative py-20 md:py-32">
+                        {/* Background decoration */}
+                        <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-fuchsia-600/10 blur-[150px]"></div>
+
+                        <div className="container mx-auto px-6">
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.2 }}
+                                variants={fadeInUp}
+                                className="reveal mb-16 text-center"
+                            >
+                                <h2 className="font-outfit bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl">
+                                    Simple, Transparent Pricing
+                                </h2>
+                                <p className="mx-auto mt-4 max-w-2xl text-white/70">Choose the plan that works best for your messaging needs</p>
+                            </motion.div>
+
+                            <div className="reveal-sequence grid gap-8 lg:grid-cols-3">
+                                {/* Free Plan */}
+                                <div className="group relative flex flex-col overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-indigo-500/5">
+                                    <div className="flex-1 p-8">
+                                        <h3 className="font-outfit text-xl font-semibold text-white">Free</h3>
+                                        <div className="mt-4 flex items-baseline">
+                                            <span className="font-outfit text-4xl font-bold text-white">$0</span>
+                                            <span className="ml-2 text-white/60">/month</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-white/60">For personal use</p>
+
+                                        <ul className="mt-8 space-y-4">
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Up to 10 contacts</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">5 scheduled messages per month</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Email messages only</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Basic templates</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Email support</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="p-8 pt-0">
+                                        <Link href={route('register')}>
+                                            <button className="h-11 w-full rounded-lg border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10">
+                                                Get Started
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                {/* Premium Plan - Highlighted */}
+                                <div className="group relative flex flex-col overflow-hidden rounded-xl border border-indigo-500/30 bg-gradient-to-b from-indigo-950/50 to-fuchsia-950/30 backdrop-blur-md transition-all duration-300 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10">
+                                    {/* Popular badge */}
+                                    <div className="absolute top-4 right-4 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-3 py-1 text-xs font-medium text-white">
+                                        Most Popular
+                                    </div>
+                                    <div className="flex-1 p-8">
+                                        <h3 className="font-outfit text-xl font-semibold text-white">Premium</h3>
+                                        <div className="mt-4 flex items-baseline">
+                                            <span className="font-outfit text-4xl font-bold text-white">$9.99</span>
+                                            <span className="ml-2 text-white/60">/month</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-white/60">For individuals and families</p>
+
+                                        <ul className="mt-8 space-y-4">
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Unlimited contacts</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">100 scheduled messages per month</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">SMS, WhatsApp & email messages</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Group messaging (up to 10 recipients)</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">All templates + custom messages</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Priority email support</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Advanced scheduling</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="p-8 pt-0">
+                                        <Link href={route('register')}>
+                                            <button className="h-11 w-full rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-600 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40">
+                                                Get Started
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                {/* Business Plan */}
+                                <div className="group relative flex flex-col overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-indigo-500/5">
+                                    <div className="flex-1 p-8">
+                                        <h3 className="font-outfit text-xl font-semibold text-white">Business</h3>
+                                        <div className="mt-4 flex items-baseline">
+                                            <span className="font-outfit text-4xl font-bold text-white">$29.99</span>
+                                            <span className="ml-2 text-white/60">/month</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-white/60">For teams and businesses</p>
+
+                                        <ul className="mt-8 space-y-4">
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Unlimited contacts</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Unlimited scheduled messages</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">SMS, WhatsApp & email messages</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Unlimited group messaging</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Custom branding</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">24/7 priority support</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">Analytics & reporting</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <CheckCircle className="mr-3 size-5 shrink-0 text-indigo-400" />
+                                                <span className="text-sm text-white/80">API access</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="p-8 pt-0">
+                                        <Link href={route('register')}>
+                                            <button className="h-11 w-full rounded-lg border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10">
+                                                Contact Sales
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* CTA Section */}
+                    <section className="py-20">
+                        <div className="container mx-auto px-6">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, amount: 0.2 }}
+                                transition={{ duration: 0.8 }}
+                                className="reveal overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-950/50 to-fuchsia-950/50 backdrop-blur-md"
+                            >
+                                <div className="p-12 md:p-16">
+                                    <div className="mx-auto max-w-2xl text-center">
+                                        <h2 className="font-outfit text-3xl font-bold tracking-tight text-white md:text-4xl">
+                                            Ready to strengthen your connections?
+                                        </h2>
+                                        <p className="mt-4 text-lg text-white/70">
+                                            Join thousands of users who use WishWave to create memorable moments through perfectly timed messages.
+                                        </p>
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            whileInView={{ opacity: 1, scale: 1 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: 0.4, duration: 0.6 }}
+                                            className="mt-10"
+                                        >
+                                            <Link href={route('register')}>
+                                                <Button
+                                                    size="lg"
+                                                    className="h-12 rounded-xl bg-white px-8 text-base font-medium text-indigo-950 hover:bg-white/90"
+                                                >
+                                                    Start your free trial <ChevronRight className="ml-2 size-4" />
+                                                </Button>
+                                            </Link>
+                                            <p className="mt-3 text-xs text-white/60">No credit card required. 14-day free trial.</p>
+                                        </motion.div>
+                        </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </section>
                     </main>
+
+                {/* Footer */}
+                <footer className="relative z-10 mt-10 border-t border-white/20 py-16">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+                            <div className="flex items-center gap-3">
+                                <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-600 p-0.5">
+                                    <div className="flex size-full items-center justify-center rounded-[6px] bg-black/80">
+                                        <AppLogoIcon className="size-5 fill-white" />
                 </div>
-                <div className="hidden h-14.5 lg:block"></div>
+                                </div>
+                                <span className="text-xl font-bold tracking-tight text-white">WishWave</span>
+                            </div>
+
+                            <div className="flex flex-wrap justify-center gap-8">
+                                <a href="#" className="text-sm text-white/70 transition-colors hover:text-white">
+                                    About
+                                </a>
+                                <a href="#" className="text-sm text-white/70 transition-colors hover:text-white">
+                                    Features
+                                </a>
+                                <a href="#" className="text-sm text-white/70 transition-colors hover:text-white">
+                                    Pricing
+                                </a>
+                                <a href="#" className="text-sm text-white/70 transition-colors hover:text-white">
+                                    Contact
+                                </a>
+                            </div>
+
+                            <div className="flex flex-col items-end text-sm">
+                                <div className="mb-2 text-white/60">&copy; {new Date().getFullYear()} WishWave. All rights reserved.</div>
+                                <div className="rounded-md border border-indigo-500/30 bg-gradient-to-r from-indigo-400 to-fuchsia-500 bg-clip-text px-3 py-1 text-base font-medium text-transparent">
+                                    Code With Zhine
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
             </div>
         </>
+    );
+}
+
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+    return (
+        <Card className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-indigo-500/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-fuchsia-500/10 opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <CardContent className="relative p-6">
+                <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/20 text-indigo-400">
+                    {icon}
+                </div>
+                <h3 className="font-outfit mb-2 text-xl font-semibold text-white">{title}</h3>
+                <p className="text-sm leading-relaxed text-white/70">{description}</p>
+            </CardContent>
+        </Card>
+    );
+}
+
+function AnimatedMetric({
+    value,
+    label,
+    isPercentage = false,
+    icon,
+}: {
+    value: number;
+    label: string;
+    isPercentage?: boolean;
+    icon: React.ReactNode;
+}) {
+    const formattedValue = useCountUp({
+        end: value,
+        duration: 2000,
+        formatter: (val) => Math.floor(val).toLocaleString() + (isPercentage ? '%' : '')
+    });
+
+    return (
+        <div className="group relative rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:transform hover:border-white/20 hover:bg-white/10">
+            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-br from-indigo-500/30 to-fuchsia-500/30 opacity-0 blur-lg transition-opacity group-hover:opacity-100"></div>
+            <div className="relative flex flex-col items-center text-center">
+                <div className="mb-3 rounded-full bg-gradient-to-br from-indigo-600/20 to-fuchsia-600/20 p-2.5">{icon}</div>
+                <div className="mb-1 text-3xl font-bold text-white">
+                    {formattedValue}
+                </div>
+                <div className="text-sm text-white/60">{label}</div>
+            </div>
+        </div>
     );
 }
