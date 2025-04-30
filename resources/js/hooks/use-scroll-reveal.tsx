@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface ScrollRevealOptions {
   threshold?: number;
@@ -15,16 +15,10 @@ export function useScrollReveal({
 }: ScrollRevealOptions = {}) {
   const elementsRef = useRef<HTMLElement[]>([]);
 
-  const registerElement = (element: HTMLElement | null) => {
-    if (element && !elementsRef.current.includes(element)) {
-      elementsRef.current.push(element);
-    }
-  };
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const element = entry.target as HTMLElement;
             element.classList.add(animateClass);
@@ -38,22 +32,31 @@ export function useScrollReveal({
           }
         });
       },
-      {
-        threshold,
-        rootMargin,
-      }
+      { threshold, rootMargin }
     );
 
-    elementsRef.current.forEach(element => {
-      observer.observe(element);
+    const currentElements = elementsRef.current;
+
+    currentElements.forEach((element) => {
+      if (element) {
+        observer.observe(element);
+      }
     });
 
     return () => {
-      elementsRef.current.forEach(element => {
-        observer.unobserve(element);
+      currentElements.forEach((element) => {
+        if (element) {
+          observer.unobserve(element);
+        }
       });
     };
   }, [threshold, rootMargin, animateClass, onReveal]);
 
-  return { registerElement };
+  const reveal = useCallback((element: HTMLElement | null) => {
+    if (element) {
+      elementsRef.current.push(element);
+    }
+  }, []);
+
+  return reveal;
 } 

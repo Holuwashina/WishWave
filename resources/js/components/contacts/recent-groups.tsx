@@ -55,7 +55,7 @@ export function RecentGroups({ groups = defaultGroups }: RecentGroupsProps) {
                 </Button>
             </div>
             <div className="grid grid-cols-2 gap-3">
-                {groups.map((group, index) => (
+                {groups.map((group) => (
                     <Link
                         key={group.id}
                         href={`/contacts?group=${group.id}`}

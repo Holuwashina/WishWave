@@ -57,7 +57,6 @@ const getGroupBadgeColor = (groupName: string) => {
 
 export default function Contacts() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedGroup, setSelectedGroup] = useState<string>('all');
     const [addGroupOpen, setAddGroupOpen] = useState(false);
     const [addContactOpen, setAddContactOpen] = useState(false);
     const [importContactsOpen, setImportContactsOpen] = useState(false);

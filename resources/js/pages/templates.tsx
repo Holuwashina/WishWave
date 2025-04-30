@@ -51,6 +51,10 @@ export default function Templates() {
     const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
     const [isNewTemplate, setIsNewTemplate] = useState(false);
     const [newTemplateName, setNewTemplateName] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [addTemplateOpen, setAddTemplateOpen] = useState(false);
+    const [templateContent, setTemplateContent] = useState('');
 
     const handleSaveTemplate = () => {
         if (editingTemplate) {
@@ -152,10 +156,8 @@ export default function Templates() {
                             </div>
 
                             <TemplateEditor
-                                content={editingTemplate.content}
-                                onChange={(content) =>
-                                    setEditingTemplate({ ...editingTemplate, content })
-                                }
+                                value={templateContent}
+                                onChange={setTemplateContent}
                             />
                         </div>
                     )}

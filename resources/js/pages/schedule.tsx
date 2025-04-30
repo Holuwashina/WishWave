@@ -35,22 +35,6 @@ const breadcrumbs = [
     },
 ];
 
-// Sample data - replace with real data fetching
-const upcomingEvents: UpcomingEvent[] = [
-    {
-        id: '1',
-        type: 'birthday',
-        title: '5 Birthdays Tomorrow',
-        description: 'Messages scheduled'
-    },
-    {
-        id: '2',
-        type: 'new_month',
-        title: 'New Month Messages',
-        description: 'Starts in 3 days'
-    }
-];
-
 // Sample data for dropdowns
 const groups = [
     { id: 1, name: 'Marketing Team', count: 12 },

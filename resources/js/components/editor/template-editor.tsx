@@ -15,12 +15,11 @@ import {
 import { cn } from '@/lib/utils';
 
 interface TemplateEditorProps {
-    content: string;
-    onChange: (content: string) => void;
-    placeholder?: string;
+    value: string;
+    onChange: (value: string) => void;
 }
 
-export function TemplateEditor({ content, onChange, placeholder }: TemplateEditorProps) {
+export function TemplateEditor({ value, onChange }: TemplateEditorProps) {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -29,7 +28,7 @@ export function TemplateEditor({ content, onChange, placeholder }: TemplateEdito
                 },
             }),
         ],
-        content,
+        content: value,
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[200px] px-4 py-2',
