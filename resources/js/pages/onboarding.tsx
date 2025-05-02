@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, User, Check, CheckCircle2 } from 'lucide-react';
+import { Building2, User, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,7 +32,7 @@ interface OnboardingProps {
     companySizes: string[];
 }
 
-export default function Onboarding({ user, accountTypes, industries, companySizes }: OnboardingProps) {
+export default function Onboarding({ accountTypes, industries, companySizes }: OnboardingProps) {
     const [step, setStep] = useState(1);
     const [selectedAccountTypeId, setSelectedAccountTypeId] = useState<number | null>(null);
     const [isCompany, setIsCompany] = useState(false);
@@ -101,11 +101,6 @@ export default function Onboarding({ user, accountTypes, industries, companySize
             
         if (price === 0) return 'Free';
         return `$${price}${isAnnual ? '/year' : '/month'}`;
-    };
-
-    // Identify the recommended plan
-    const getRecommendedPlan = (types: Array<{id: number; slug: string}>) => {
-        return types.find(type => type.slug === 'premium')?.id || null;
     };
 
     return (
