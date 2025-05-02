@@ -41,4 +41,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+    
+    /**
+     * Indicate that the user has completed onboarding.
+     */
+    public function withCompletedOnboarding(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'onboarding_completed_at' => now(),
+        ]);
+    }
 }
