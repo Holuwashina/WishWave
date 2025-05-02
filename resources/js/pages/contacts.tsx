@@ -17,7 +17,6 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Filter, Plus, Search, Upload, UserPlus, Users } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 import { AddGroupDialog } from '@/components/contacts/add-group-dialog';
 import { ImportContactsDialog } from '@/components/contacts/import-contacts-dialog';
 import { AddContactDialog } from '@/components/contacts/add-contact-dialog';
